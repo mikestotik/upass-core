@@ -1,0 +1,31 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: upass-postgres
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=upass
+      - POSTGRES_PASSWORD=upass
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/postgresql:/var/lib/postgresql/
+    ports:
+      - '5433:5432'
+
+  pgadmin:
+    container_name: upass-admin
+    image: dpage/pgadmin4:8.9
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - '5051:80'
+    depends_on:
+      - postgres
+
+networks:
+  default:
+    name: upass
