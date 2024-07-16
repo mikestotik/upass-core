@@ -26,6 +26,16 @@ services:
     depends_on:
       - postgres
 
+  app:
+    container_name: upass-core
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+
 networks:
   default:
     name: upass
