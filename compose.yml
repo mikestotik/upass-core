@@ -27,7 +27,7 @@ services:
       - postgres
 
   app:
-    container_name: upass-core
+    container_name: upass-app
     build:
       context: .
       dockerfile: Dockerfile

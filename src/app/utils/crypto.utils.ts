@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt'; // todo: migrate to bcryptjs
+import * as bcrypt from 'bcryptjs';
 
 
 export class CryptoUtils {
@@ -7,7 +7,7 @@ export class CryptoUtils {
   }
 
 
-  public static compareHashes(data: string | Buffer, encrypted: string): boolean {
+  public static compareHashes(data: string, encrypted: string): boolean {
     return bcrypt.compareSync(data, encrypted);
   }
 }
