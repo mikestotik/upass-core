@@ -12,7 +12,7 @@ services:
     volumes:
       - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/postgresql:/var/lib/postgresql/
     ports:
-      - '5433:5432'
+      - '5432:5432'
 
   pgadmin:
     container_name: upass-admin
