@@ -15,7 +15,7 @@ import { ChangePasswordDTO, UserCreatedEvent, UserEmailDTO } from '../user/user.
 import { UserStatus } from '../user/user.enum';
 import { UserService } from '../user/user.service';
 import { UserUtils } from '../user/user.utils';
-import { ActivateAccountDTO, CreateAccountDTO, UpdateAccountDTO } from './account.dto';
+import { AccountCreatedDTO, ActivateAccountDTO, CreateAccountDTO, UpdateAccountDTO } from './account.dto';
 
 
 @Injectable()
@@ -35,17 +35,25 @@ export class AccountService {
   }
 
 
-  public async create(dto: CreateAccountDTO) {
+  public async create(dto: CreateAccountDTO): Promise<AccountCreatedDTO> {
     UserUtils.validateEmail(dto.email);
     UserUtils.validatePassword(dto.password);
 
+    const { needEmailConfirm } = this.config.auth;
+
     const user = await this.userService.create({
       ...dto,
-      status: UserStatus.PendingEmailConfirmation
+      status: needEmailConfirm ? UserStatus.PendingEmailConfirmation : UserStatus.Activated
     });
     this.eventEmitter.emit('user.created', new UserCreatedEvent(user.id));
+
+    if (!needEmailConfirm) {
+      return { needConfirm: false };
+    }
+
     try {
       await this.sendEmailConfirmation(user);
+      return { needConfirm: true };
     } catch (e) {
       await this.userService.remove(user.id);
       throw new InternalServerErrorException('Sorry, you cannot register at the moment because the mail server is unavailable.');

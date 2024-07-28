@@ -52,6 +52,7 @@ export interface AuthJwtConfig {
 
 export interface AuthConfig {
   jwt: AuthJwtConfig;
+  needEmailConfirm: boolean;
 }
 
 

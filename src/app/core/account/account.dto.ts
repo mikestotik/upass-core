@@ -6,6 +6,11 @@ export class CreateAccountDTO extends UserCredentialsDTO {
 }
 
 
+export interface AccountCreatedDTO {
+  needConfirm: boolean;
+}
+
+
 export class ActivateAccountDTO {
   email: string;
   code: number;

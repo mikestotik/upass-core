@@ -23,6 +23,7 @@ auth:
     refresh:
       secret: 'secret'
       ttl: '7d'
+  needEmailConfirm: false
 crypto:
   saltOrRounds: 10
   secret: 'secret'
