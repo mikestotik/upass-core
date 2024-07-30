@@ -10,7 +10,7 @@ export const APP_ROOT_PATH = __dirname;
 export const APP_CONFIG_DIR_NAME = 'config';
 export const APP_CONFIG_FILE_NAME = 'application.yml';
 export const APP_ENV = process.env.NODE_ENV;
-export const APP_ENV_CONFIG_FILE_NAME = `application${APP_ENV ? '.' + APP_ENV : ''}.yml`;
+export const APP_ENV_CONFIG_FILE_NAME = `application${ APP_ENV ? '.' + APP_ENV : '' }.yml`;
 
 export const APP_BANNER_FILE_PATH = join(__dirname, 'assets', 'banner.txt');
 export const APP_TEMPLATES_DIR_PATH = join(__dirname, 'assets', 'templates');
