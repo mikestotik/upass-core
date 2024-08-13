@@ -67,7 +67,7 @@ export class AccountController {
 
 
   @UseGuards(AccessTokenGuard)
-  @Post('master-pass')
+  @Post('master-password')
   public setMasterPassword(@Body() dto: UserMasterPasswordDTO, @TokenPayload() payload: JwtPayload) {
     return this.accountService.setMasterPassword(dto.masterPassword, payload.sub);
   }
