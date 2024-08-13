@@ -1,7 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '../../config/config.module';
-import { ConfirmModule } from '../confirm/confirm.module';
+import { OtpModule } from '../otp/otp.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
@@ -15,7 +15,7 @@ import { RefreshTokenStrategy } from './strategy/refresh-token.strategy';
   imports: [
     HttpModule,
     UserModule,
-    ConfirmModule,
+    OtpModule,
     ConfigModule,
     MailerModule
   ],

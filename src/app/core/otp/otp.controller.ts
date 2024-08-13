@@ -3,35 +3,35 @@ import { plainToInstance } from 'class-transformer';
 import { TokenPayload } from '../../decor/token.decorator';
 import { JwtPayload } from '../../interfaces/jwt.interface';
 import { AccessTokenGuard } from '../auth/guards/token.guard';
-import { ConfirmDTO } from './confirm.dto';
-import { ConfirmService } from './confirm.service';
+import { OtpDto } from './otp.dto';
+import { OtpService } from './otp.service';
 
 
-@Controller('confirmation')
-export class ConfirmController {
+@Controller('otp')
+export class OtpController {
 
   constructor(
-    private readonly confirmService: ConfirmService) {
+    private readonly otpService: OtpService) {
   }
 
 
   @UseGuards(AccessTokenGuard)
   @Get()
   public async findAllForUser(@TokenPayload() payload: JwtPayload) {
-    return this.confirmService.findByOwner(payload.sub)
-      .then(value => plainToInstance(ConfirmDTO, value));
+    return this.otpService.findByOwner(payload.sub)
+      .then(value => plainToInstance(OtpDto, value));
   }
 
 
-  @Get('confirm/:code')
+  @Get('otp/:confirm')
   public async confirm(@Param('code', ParseIntPipe) code: number) {
-    return this.confirmService.confirm(code);
+    return this.otpService.confirm(code);
   }
 
 
   @UseGuards(AccessTokenGuard)
   @Delete(':id')
   public async delete(@Param('id', ParseIntPipe) id: number, @TokenPayload() payload: JwtPayload) {
-    return this.confirmService.deleteByIdAndOwner(id, payload.sub);
+    return this.otpService.deleteByIdAndOwner(id, payload.sub);
   }
 }

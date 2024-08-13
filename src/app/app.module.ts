@@ -6,7 +6,7 @@ import { DatabaseModule } from '../database/database.module';
 import { ConfigModule } from './config/config.module';
 import { AccountModule } from './core/account/account.module';
 import { AuthModule } from './core/auth/auth.module';
-import { ConfirmModule } from './core/confirm/confirm.module';
+import { OtpModule } from './core/otp/otp.module';
 import { GoogleModule } from './core/google/google.module';
 import { HealthModule } from './core/health/health.module';
 import { MailerModule } from './core/mailer/mailer.module';
@@ -33,7 +33,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     // Core
     AccountModule,
     AuthModule,
-    ConfirmModule,
+    OtpModule,
     MailerModule,
     GoogleModule,
     HealthModule,

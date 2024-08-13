@@ -8,8 +8,8 @@ import { APP_TEMPLATES_DIR_PATH } from '../../../config';
 import { ConfigService } from '../../config/config.service';
 import { UserEntity } from '../../entities/user.entity';
 import { CryptoUtils } from '../../utils/crypto.utils';
-import { ConfirmService } from '../confirm/confirm.service';
-import { ConfirmUtils } from '../confirm/confirm.utils';
+import { OtpService } from '../otp/otp.service';
+import { OtpUtils } from '../otp/otp.utils';
 import { MailerService } from '../mailer/mailer.service';
 import { ChangePasswordDTO, UserCreatedEvent, UserEmailDTO } from '../user/user.dto';
 import { UserStatus } from '../user/user.enum';
@@ -23,7 +23,7 @@ export class AccountService {
 
   constructor(
     private readonly userService: UserService,
-    private readonly confirmService: ConfirmService,
+    private readonly otpService: OtpService,
     private readonly emailService: MailerService,
     private readonly config: ConfigService,
     private readonly eventEmitter: EventEmitter2) {
@@ -43,7 +43,7 @@ export class AccountService {
 
     const user = await this.userService.create({
       ...dto,
-      status: needEmailConfirm ? UserStatus.PendingEmailConfirmation : UserStatus.Activated
+      status: needEmailConfirm ? UserStatus.PendingEmailConfirmation : UserStatus.Activated,
     });
     this.eventEmitter.emit('user.created', new UserCreatedEvent(user.id));
 
@@ -67,15 +67,15 @@ export class AccountService {
 
     const user = await this.userService.findByEmail(dto.email);
     if (!user) {
-      throw new BadRequestException(`User with email: ${ dto.email } does not exists.`);
+      throw new BadRequestException(`User with email: ${dto.email} does not exists.`);
     }
-    const confirm = await this.confirmService.findByCode(dto.code);
-    ConfirmUtils.validate(confirm);
+    const confirm = await this.otpService.findByCode(dto.code);
+    OtpUtils.validate(confirm);
 
     await this.userService.update(user.id, {
-      status: UserStatus.Activated
+      status: UserStatus.Activated,
     });
-    await this.confirmService.delete(confirm!.id);
+    await this.otpService.delete(confirm!.id);
   }
 
 
@@ -94,7 +94,7 @@ export class AccountService {
 
     const user = await this.userService.findByEmail(email);
     if (!user) {
-      throw new NotFoundException(`The user with email ${ email } was not registered`);
+      throw new NotFoundException(`The user with email ${email} was not registered`);
     }
     try {
       await this.sendEmailConfirmation(user);
@@ -109,11 +109,11 @@ export class AccountService {
     UserUtils.validateEmail(dto.email);
 
     if (await this.userService.findByEmail(dto.email)) {
-      throw new BadRequestException(`User with email: ${ dto.email } exist`);
+      throw new BadRequestException(`User with email: ${dto.email} exist`);
     }
     const user = await this.userService.update(userId, {
       email: dto.email,
-      status: UserStatus.PendingEmailConfirmation
+      status: UserStatus.PendingEmailConfirmation,
     });
     await this.sendEmailConfirmation(user);
     return user;
@@ -131,21 +131,21 @@ export class AccountService {
 
 
   public async sendEmailConfirmation(user: UserEntity): Promise<unknown> {
-    const confirm = await this.confirmService.createEmailConfirmation(user.id, user.email);
+    const confirm = await this.otpService.createEmailConfirmation(user.id, user.email);
 
     const html = fs.readFileSync(join(APP_TEMPLATES_DIR_PATH, 'welcome.hbs'), 'utf8');
     const template = Handlebars.compile(html);
 
     return this.emailService.send({
       subject: 'Account Email Confirmation ✔',
-      from: `${ this.config.app.name } <${ this.config.mail.auth.user }>`,
+      from: `${this.config.app.name} <${this.config.mail.auth.user}>`,
       to: user.email,
       html: template({
         appName: this.config.app.name,
         username: 'Bro!',
         expired: dayjs(confirm.exp).format('MMMM D, YYYY h:mm A'),
-        code: confirm.code
-      })
+        code: confirm.code,
+      }),
     });
   }
 

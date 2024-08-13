@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotImplementedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import dayjs from 'dayjs';
@@ -7,36 +7,36 @@ import { RandomUtils } from '../../utils/random.utils';
 import { UserEmailDTO } from '../user/user.dto';
 import { UserStatus } from '../user/user.enum';
 import { UserService } from '../user/user.service';
-import { CreateConfirmDTO } from './confirm.dto';
-import { ConfirmEntity } from '../../entities/confirm.entity';
-import { ConfirmType } from './confirm.enum';
-import { ConfirmUtils } from './confirm.utils';
+import { CreateOtpDTO } from './otp.dto';
+import { OtpEntity } from '../../entities/otp.entity';
+import { OtpType } from './otp.enum';
+import { OtpUtils } from './otp.utils';
 
 
 @Injectable()
-export class ConfirmService {
+export class OtpService {
 
 
   constructor(
-    @InjectRepository(ConfirmEntity)
-    private readonly repository: Repository<ConfirmEntity>,
+    @InjectRepository(OtpEntity)
+    private readonly repository: Repository<OtpEntity>,
     private readonly userService: UserService) {
   }
 
 
   public findByOwner(ownerId: number) {
-    return this.repository.find({ where: { owner: { id: ownerId } } });
+    return this.repository.findBy({ owner: { id: ownerId } });
   }
 
 
-  public findByCode(code: number): Promise<ConfirmEntity | null> {
+  public findByCode(code: number): Promise<OtpEntity | null> {
     return this.repository.findOneBy({ code });
   }
 
 
-  public create(userId: number, dto: CreateConfirmDTO) {
+  public create(userId: number, dto: CreateOtpDTO) {
     return this.repository.save(
-      plainToInstance(ConfirmEntity, { ...dto, owner: { id: userId } })
+      plainToInstance(OtpEntity, { ...dto, owner: { id: userId } }),
     );
   }
 
@@ -44,19 +44,22 @@ export class ConfirmService {
   public async confirm(code: number) {
     const entity = await this.findByCode(code);
 
-    ConfirmUtils.validate(entity);
+    OtpUtils.validate(entity);
 
     switch (entity!.type) {
-      case ConfirmType.EmailConfirmation:
-        return this.handleEmailConfirmation(entity as ConfirmEntity<UserEmailDTO>);
+      case OtpType.EmailConfirm:
+        return this.handleEmailConfirm(entity as OtpEntity<UserEmailDTO>);
+      case OtpType.ChangePasswordConfirm:
+        return this.handleChangePasswordConfirm(entity);
     }
   }
 
 
-  private async handleEmailConfirmation({ data }: ConfirmEntity<UserEmailDTO>) {
+  private async handleEmailConfirm({ data }: OtpEntity<UserEmailDTO>) {
     const user = await this.validateUserEmail(data!.email);
+
     await this.userService.update(user.id, {
-      status: UserStatus.Activated
+      status: UserStatus.Activated,
     });
   }
 
@@ -64,10 +67,15 @@ export class ConfirmService {
   public createEmailConfirmation(userId: number, email: string) {
     return this.create(userId, {
       code: RandomUtils.generateCode(),
-      type: ConfirmType.EmailConfirmation,
+      type: OtpType.EmailConfirm,
       data: { email },
-      exp: dayjs().add(3600, 'second').toDate()
+      exp: dayjs().add(3600, 'second').toDate(),
     });
+  }
+
+
+  private handleChangePasswordConfirm(entity: OtpEntity<object> | null) {
+    throw new NotImplementedException();
   }
 
 
@@ -92,5 +100,6 @@ export class ConfirmService {
   public async delete(id: number) {
     await this.repository.delete(id);
   }
+
 
 }

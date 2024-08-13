@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '../../config/config.service';
 import { UserStatus } from '../user/user.enum';
 import { RandomUtils } from '../../utils/random.utils';
-import { ConfirmService } from '../confirm/confirm.service';
-import { ConfirmUtils } from '../confirm/confirm.utils';
+import { OtpService } from '../otp/otp.service';
+import { OtpUtils } from '../otp/otp.utils';
 import { MailerService } from '../mailer/mailer.service';
 import { UserCredentialsDTO, UserEmailDTO, UserPasswordUpdateDTO } from '../user/user.dto';
 import { UserService } from '../user/user.service';
@@ -20,7 +20,7 @@ export class AuthService {
     private readonly emailService: MailerService,
     private readonly config: ConfigService,
     private readonly tokenService: TokenService,
-    private readonly confirmService: ConfirmService) {
+    private readonly otpService: OtpService) {
   }
 
 
@@ -91,16 +91,16 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException(`User with email: ${ payload.email } not found.`);
     }
-    const confirm = await this.confirmService.createEmailConfirmation(user.id, user.email);
+    const confirm = await this.otpService.createEmailConfirmation(user.id, user.email);
     await this.userService.updatePassword(user.id, RandomUtils.generatePassword());
     await this.sendResetPasswordEmail(payload.email, confirm.code);
   }
 
 
   public async updatePassword(payload: UserPasswordUpdateDTO) {
-    const confirm = await this.confirmService.findByCode(payload.code);
+    const confirm = await this.otpService.findByCode(payload.code);
 
-    ConfirmUtils.validate(confirm);
+    OtpUtils.validate(confirm);
     UserUtils.validatePassword(payload.password);
 
     await this.userService.updatePassword(confirm!.owner.id, payload.password);

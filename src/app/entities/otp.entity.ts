@@ -1,16 +1,16 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { DBEntity } from '../../database/database.dto';
 import { UserEntity } from './user.entity';
-import { ConfirmType } from '../core/confirm/confirm.enum';
+import { OtpType } from '../core/otp/otp.enum';
 
 
-@Entity('confirmations')
-export class ConfirmEntity<T = object> extends DBEntity {
+@Entity('otp')
+export class OtpEntity<T = object> extends DBEntity {
   @Column()
   code!: number;
 
-  @Column({ type: 'enum', enum: ConfirmType, nullable: true })
-  type!: ConfirmType;
+  @Column({ type: 'enum', enum: OtpType, nullable: true })
+  type!: OtpType;
 
   @Column({ type: 'timestamptz' })
   exp!: Date;
