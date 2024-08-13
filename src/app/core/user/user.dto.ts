@@ -16,6 +16,11 @@ export class UserPasswordDTO {
 }
 
 
+export class UserMasterPasswordDTO {
+  masterPassword!: string;
+}
+
+
 export class UserCredentialsDTO implements UserEmailDTO, UserPasswordDTO {
   email!: string;
   password!: string;

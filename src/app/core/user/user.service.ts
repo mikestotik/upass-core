@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, QueryFailedError, Repository, UpdateResult } from 'typeorm';
@@ -43,7 +43,7 @@ export class UserService {
   public async findOne(id: number) {
     const user = await this.findById(id);
     if (!user) {
-      throw new BadRequestException(`User with id: ${ id } does not exist.`);
+      throw new BadRequestException(`User with id: ${id} does not exist.`);
     }
     return user;
   }
@@ -65,11 +65,11 @@ export class UserService {
 
     const user = await this.findByEmail(dto.email);
     if (user) {
-      throw new BadRequestException(`User with email: ${ dto.email } exists.`);
+      throw new BadRequestException(`User with email: ${dto.email} exists.`);
     }
 
     const roles: (RoleEntity | null)[] = await Promise.all(
-      [ role || Role.User ].map(role => this.roleService.findByRole(role))
+      [role || Role.User].map(role => this.roleService.findByRole(role)),
     );
 
     try {
@@ -78,7 +78,7 @@ export class UserService {
         password: CryptoUtils.hash(dto.password, this.config.crypto.saltOrRounds),
         fullName: dto.fullName,
         roles: roles.filter(role => !!role) as RoleEntity[],
-        status: dto.status
+        status: dto.status,
       });
     } catch (e) {
       const error = e as QueryFailedError;
@@ -96,7 +96,7 @@ export class UserService {
     let value: object;
 
     if (dto.roles) {
-      const roles: RoleEntity[] = <RoleEntity[]> await Promise.all(dto.roles.map(role => this.roleService.findByRole(role)));
+      const roles: RoleEntity[] = <RoleEntity[]>await Promise.all(dto.roles.map(role => this.roleService.findByRole(role)));
       value = { ...user, ...dto, roles };
     } else {
       value = { ...user, ...dto };
@@ -109,6 +109,13 @@ export class UserService {
     password = CryptoUtils.hash(password, this.config.crypto.saltOrRounds);
 
     return this.repository.update(id, { password });
+  }
+
+
+  public async setMasterPassword(masterPassword: string, id: number) {
+    masterPassword = CryptoUtils.hash(masterPassword, this.config.crypto.saltOrRounds);
+
+    return this.repository.update(id, { masterPassword });
   }
 
 

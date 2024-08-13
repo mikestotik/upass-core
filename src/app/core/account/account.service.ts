@@ -123,10 +123,17 @@ export class AccountService {
   public async changePassword(userId: number, dto: ChangePasswordDTO) {
     const user = await this.userService.findById(userId);
 
+    if (!user) throw new BadRequestException();
+
     if (!CryptoUtils.compareHashes(dto.oldPassword, user!.password)) {
       throw new BadRequestException('The old password does not match');
     }
     await this.userService.updatePassword(userId, dto.newPassword);
+  }
+
+
+  public async setMasterPassword(masterPassword: string, userId: number) {
+    await this.userService.setMasterPassword(masterPassword, userId);
   }
 
 
@@ -148,5 +155,4 @@ export class AccountService {
       }),
     });
   }
-
 }

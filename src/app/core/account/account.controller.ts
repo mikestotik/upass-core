@@ -4,7 +4,7 @@ import { TokenPayload } from '../../decor/token.decorator';
 import { JwtPayload } from '../../interfaces/jwt.interface';
 
 import { AccessTokenGuard } from '../auth/guards/token.guard';
-import { ChangePasswordDTO, UserDTO, UserEmailDTO } from '../user/user.dto';
+import { ChangePasswordDTO, UserDTO, UserEmailDTO, UserMasterPasswordDTO } from '../user/user.dto';
 import { ActivateAccountDTO, CreateAccountDTO, UpdateAccountDTO } from './account.dto';
 import { AccountService } from './account.service';
 
@@ -31,23 +31,17 @@ export class AccountController {
   }
 
 
-  @Post('activate')
-  public activate(@Body() dto: ActivateAccountDTO) {
-    return this.accountService.activate(dto);
-  }
-
-
-  @Post('resend-email')
-  public resendEmail(@Body() dto: UserEmailDTO) {
-    return this.accountService.resendEmailConfirmation(dto.email);
-  }
-
-
   @UseGuards(AccessTokenGuard)
   @Patch()
   public async update(@TokenPayload() payload: JwtPayload, @Body() dto: UpdateAccountDTO) {
     return this.accountService.update(payload.sub, dto)
       .then(value => plainToInstance(UserDTO, value));
+  }
+
+
+  @Post('activate')
+  public activate(@Body() dto: ActivateAccountDTO) {
+    return this.accountService.activate(dto);
   }
 
 
@@ -63,6 +57,19 @@ export class AccountController {
   public async changeEmail(@TokenPayload() payload: JwtPayload, @Body() dto: UserEmailDTO) {
     return this.accountService.changeEmail(payload.sub, dto)
       .then(value => plainToInstance(UserDTO, value));
+  }
+
+
+  @Post('resend-email')
+  public resendEmail(@Body() dto: UserEmailDTO) {
+    return this.accountService.resendEmailConfirmation(dto.email);
+  }
+
+
+  @UseGuards(AccessTokenGuard)
+  @Post('master-pass')
+  public setMasterPassword(@Body() dto: UserMasterPasswordDTO, @TokenPayload() payload: JwtPayload) {
+    return this.accountService.setMasterPassword(dto.masterPassword, payload.sub);
   }
 
 

@@ -16,6 +16,9 @@ export class UserEntity extends DBEntity {
   @Column()
   password!: string;
 
+  @Column()
+  masterPassword!: string;
+
   @Column({ nullable: true })
   logo?: string;
 
